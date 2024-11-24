@@ -1,9 +1,22 @@
 import dotenv from 'dotenv';
 import connectDb from './db/indexdb.js'
 dotenv.config({path:'./.env'});
+import app from './app.js';
 
 
 connectDb()
+.then(()=> {
+
+    app.on("error",(error)=>{
+        console.log(`database or server is on but failed to connected`,error)
+        throw error
+
+    })
+    app.listen(process.env.PORT|| 8000,()=>{
+        console.log("server is running on port",process.env.PORT)
+    })
+})
+.catch((e)=> console.log("Mongodb data connection failed",e.message))
 
 
 
