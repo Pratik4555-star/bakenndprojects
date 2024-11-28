@@ -13,8 +13,10 @@ app.use(express.urlencoded({extended:true, limit:"16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
 
+// importing the routes from route models
 
-app.get('/',(req,res)=>{
-    res.send("<h1>hello<h1>")
-})
+import userRouter from "./routes/user.route.js";
+
+app.use("/api/v1/users", userRouter)
+
 export default app

@@ -1,11 +1,12 @@
-const asynchandler = (requetsHandler)=>{
-(req,res,next)=>{
-    Promise.resolve(requetsHandler(req,res,nexr)).catch((err)=>next(err))
-}
+const asyncHandler = (requestHandler) => {
+    return (req, res, next) => {
+        Promise.resolve(requestHandler(req, res, next)).catch(next);
+    };
+};
 
-}
+export { asyncHandler };
 
-export default asynchandler
+
 
 
 
