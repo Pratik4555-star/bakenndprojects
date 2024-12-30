@@ -13,7 +13,9 @@ const generateAccessandRefreshToken = async (userid) => {
     try {
         const user = await User.findById(userid)
         const accessToken = await user.generateAccessToken()
+        console.log("accessToken")
         const refreshToken = await user.generateRefreshToken()
+        console.log("refreshToken")
 
         user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
@@ -56,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const avtarLocalPath = req.files?.avtar[0]?.path;
     console.log('Avatar File Path:', avtarLocalPath)
-    const coverImagePath = req.files?.coverimage?.[0]?.path || null
+    let coverImagePath = req.files?.coverimage?.[0]?.path || null
 
     if (!avtarLocalPath) {
         throw new ApiError(400, "Avtar file is required")
@@ -82,7 +84,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     const createdUser = await User.findById(user._id).select(
-        "-password -refreshtoken"
+        "-password -refreshToken"
     )
 
     if (!createdUser) {
@@ -126,21 +128,27 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     const { accessToken, refreshToken } = await generateAccessandRefreshToken(user._id)
-
+   
+ 
     const loggedinUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
 
     //secure sharing of cookies
+    // const option = {
+    //     httpOnly: true,
+    //     secure: true
+    // }
     const option = {
         httpOnly: true,
-        secure: true
-    }
+        secure: true, // Only set true in production
+        // sameSite: 'strict' // Cookie expiration time
+    };
 
     return res.status(200)
-        .cookie("accesstoken", accessToken, option)
-        .cookie("refreshToekn", refreshToken, option)
-        .json(
+    .cookie("accessToken", accessToken, option)
+    .cookie("refreshToken", refreshToken, option)
+    .json(
             new ApiResponse(200, {
                 user: loggedinUser, refreshToken, accessToken
             }, "userloggedint successfully")
@@ -152,8 +160,8 @@ const logOutUser = asyncHandler(async (req, res) => {
     //clear cookies
     //clear accesstoken and refreshtoken
     await User.findByIdAndUpdate(req.user._id, {
-        $set: {
-            refreshToken: undefined,
+        $unset: {
+            refreshToken: 1,
 
         }
     }, {
@@ -219,4 +227,12 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
 })
 
 
+
+const ChangeCurrentPassword = asyncHandler(async (req,res)=>{
+    const{oldPassword, newPassword} = req.body
+})
+
+
 export { registerUser, loginUser, logOutUser, refreshAccessToken};
+
+

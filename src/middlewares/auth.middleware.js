@@ -2,15 +2,21 @@ import { User } from "../models/user.model.js";
 import ApiError from "../utils/apiError.js";
 import { asyncHandler } from "../utils/aysncHandler.js";
 import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config({path:'./.env'});
 
 export const verifyJwt = asyncHandler(async (req, _, next)=>
-   {try 
+   {
+      try 
      {
  
-  const token = await req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+  const token = await req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
+  console.log("headers",req.header)
+  console.log("cookies",req.cookies)
+  console.log(token)
  
   if(!token){
-     throw new ApiError(401,"Unauthoried request");
+     throw new ApiError(401,"Unauthoried request")
   }
  
   const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,)
@@ -21,7 +27,7 @@ export const verifyJwt = asyncHandler(async (req, _, next)=>
      throw new ApiError(401,"Invalid access token");
   }
  
- req.user = user
+ req.user = user;
  next()
    } catch (error) {
      throw new ApiError(401,error?.message || "Invalid access");

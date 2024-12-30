@@ -16,6 +16,8 @@ router.route("/register").post(
         }
     ]),
     registerUser)
+
+    
 router.route("/login").post(
     verifyJwt,
     loginUser
